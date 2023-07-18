@@ -194,10 +194,10 @@ namespace bettersigntool
             HasRequiredOption("I|input=", "The input file to sign. If the input is a .txt, it " +
                                          "is assumed to be a list of input files to sign.", i => InputFile = i);
 
-            HasRequiredOption("d|description=", "Content description, often matches company/vendor name.",
+            HasOption("d|description=", "Content description, often matches company/vendor name.",
                 d => Description = d);
 
-            HasRequiredOption("du|url=", "Content URL, often matches company/vendor site URL.",
+            HasOption("du|url=", "Content URL, often matches company/vendor site URL.",
                 du => Url = du);
 
             HasRequiredOption("f|certfile=", "The signing certificate in a file. Only PFX is supported.",
@@ -251,12 +251,13 @@ namespace bettersigntool
                 TimestampServer = "http://timestamp.verisign.com/scripts/timstamp.dll";
             }
 
-            // Fallback to Win 8.1 SDK
+            // Fallback to current dir
             //
             if (String.IsNullOrEmpty(SigntoolPath))
             {
-                SigntoolPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-                    @"Windows Kits\8.1\bin\x64\signtool.exe");
+                string exeFullName = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string dirFullName = Path.GetDirectoryName(exeFullName);
+                SigntoolPath = Path.Combine(dirFullName, "signtool.exe");
             }
 
             InitialRetryWait = TimeSpan.FromSeconds(3);
@@ -377,8 +378,6 @@ namespace bettersigntool
             List<string> arguments = new List<string>
             {
                 "sign",
-                $"/d \"{Description}\"",
-                $"/du \"{Url}\"",
                 $"/f \"{CertificateFile}\"",
                 $"/p \"{PfxPassword}\""
             };
